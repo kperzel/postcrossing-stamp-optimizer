@@ -8,6 +8,12 @@ source("R/optimizer.R")
 # Load rates once at startup (not per session)
 rates_data <- fetch_usps_rates()
 
+get_rate <- function(id) {
+  rates_data$stamps %>%
+    filter(id == !!id) %>%
+    pull(value)
+}
+
 # ── UI ────────────────────────────────────────────────────────────────────────
 
 ui <- fluidPage(
@@ -78,7 +84,8 @@ ui <- fluidPage(
     
     mainPanel(width = 8,
               
-              h4(paste0("🏆 Top Combinations for International Letter Postage ($1.70)")),
+              h4(paste0("🏆 Top Combinations for International Letter Postage ($",
+                formatC(get_rate("intl_global_forever"), format = "f", digits = 2), ")")),
               p(em("Ranked by: least overage first, then fewest stamps used")),
               
               tableOutput("results_table"),
@@ -101,17 +108,14 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   # -- Render current rates summary --
-  output$rates_display <- renderUI({
-    r <- rates_data$rates
-    tags$ul(
-      tags$li(paste("Domestic Letter (1oz):",  scales::dollar(r$domestic_letter_1oz))),
-      tags$li(paste("Domestic Letter (2oz):",  scales::dollar(r$domestic_letter_2oz))),
-      tags$li(paste("Domestic Letter (3oz):",  scales::dollar(r$domestic_letter_3oz))),
-      tags$li(paste("Domestic Postcard:",       scales::dollar(r$domestic_postcard))),
-      tags$li(paste("Additional Ounce:",        scales::dollar(r$domestic_additional_oz))),
-      tags$li(paste("International Letter:",    scales::dollar(r$international_letter_1oz)))
-    )
-  })
+output$rates_display <- renderUI({
+  tags$ul(
+    lapply(seq_len(nrow(rates_data$stamps)), function(i) {
+      tags$li(paste0(rates_data$stamps$name[i], ": $",
+                     formatC(rates_data$stamps$value[i], format = "f", digits = 2)))
+    })
+  )
+})
   
   # -- Render checkbox groups per category --
   # Helper function to avoid repeating code three times
@@ -173,7 +177,7 @@ server <- function(input, output, session) {
   if (is.na(max_s) || max_s < 1) max_s <- 1
   if (max_s > 10) max_s <- 10
 
-  target <- round(rates_data$rates$international_letter_1oz * 100)
+  target <- round(get_rate("intl_global_forever") * 100)
 
   find_combinations(owned_stamps = owned,
                     target_cents = target,
