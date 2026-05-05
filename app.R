@@ -111,25 +111,32 @@ server <- function(input, output, session) {
 output$rates_display <- renderUI({
   tags$ul(
     lapply(seq_len(nrow(rates_data$stamps)), function(i) {
-      tags$li(paste0(rates_data$stamps$name[i], ": $",
-                     formatC(rates_data$stamps$value[i], format = "f", digits = 2)))
+      tags$li(paste0(
+        rates_data$stamps$name[i], ": $",
+        formatC(rates_data$stamps$value[i], format = "f", digits = 2)
+      ))
     })
   )
 })
   
   # -- Render checkbox groups per category --
   # Helper function to avoid repeating code three times
-  make_checkboxes <- function(cat) {
-    renderUI({
-      cat_stamps <- rates_data$stamps %>% filter(category == cat)
-      checkboxGroupInput(
-        inputId  = paste0("stamps_", cat),
-        label    = NULL,
-        choices  = setNames(as.character(cat_stamps$id), cat_stamps$name),
-        selected = NULL   # Nothing pre-selected — user picks what they own
-      )
-    })
-  }
+make_checkboxes <- function(cat) {
+  renderUI({
+    cat_stamps <- rates_data$stamps %>%
+      filter(category == cat)
+    checkboxGroupInput(
+      inputId  = paste0("stamps_", cat),
+      label    = NULL,
+      choices  = setNames(
+        cat_stamps$id,
+        paste0(cat_stamps$name, " ($",
+               formatC(cat_stamps$value, format = "f", digits = 2), ")")
+      ),
+      selected = NULL
+    )
+  })
+}
   
   output$checkboxes_Makeup        <- make_checkboxes("Makeup")
   output$checkboxes_Domestic      <- make_checkboxes("Domestic")
