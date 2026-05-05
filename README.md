@@ -1,4 +1,4 @@
-# 📬 USPS Stamp Optimizer
+# 📬 USPS Stamp Optimizer for Postcrossing
 
 A Shiny app that helps you find the optimal combination of stamps 
 you already own to cover current international USPS postage rates.
