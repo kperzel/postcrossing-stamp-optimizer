@@ -1,6 +1,8 @@
 # app.R
 library(shiny)
 library(dplyr)
+library(shinycssloaders)
+library(bslib)
 
 source("R/fetch_rates.R")
 source("R/optimizer.R")
@@ -14,9 +16,95 @@ get_rate <- function(id) {
     pull(value)
 }
 
+pastel_theme <- bs_theme(
+  version        = 5,
+  bg             = "#fff0f5",   # Lavender blush — soft pink page background
+  fg             = "#4a3040",   # Dark plum — easy to read on light backgrounds
+  primary        = "#f48fb1",   # Medium pink — buttons, links, accents
+  secondary      = "#ce93d8",   # Soft purple — secondary accents
+  success        = "#a5d6a7",   # Pastel green — success states
+  info           = "#81d4fa",   # Pastel blue — info states
+  warning        = "#ffe082",   # Pastel yellow — warnings
+  danger         = "#ef9a9a",   # Pastel red — errors
+  base_font      = font_google("Nunito"),       # Soft rounded font
+  heading_font   = font_google("Pacifico"),     # Fun cursive headings
+  font_scale     = 1.05
+)
+
 # ── UI ────────────────────────────────────────────────────────────────────────
 
 ui <- fluidPage(
+  theme = bs_theme(
+    version   = 5,
+    bg        = "#fff0f5",
+    fg        = "#4a3040",
+    primary   = "#f48fb1",
+    secondary = "#ce93d8",
+    success   = "#a5d6a7",
+    info      = "#81d4fa",
+    warning   = "#ffe082",
+    danger    = "#ef9a9a",
+    font_scale = 1.05
+    # No base_font or heading_font here — handled via CSS below
+  ),
+  
+  tags$head(
+    # Google Fonts loaded by the browser, not R — no firewall issues
+    tags$link(
+      rel  = "stylesheet",
+      href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap"
+    ),
+    tags$style(HTML("
+
+      body, .shiny-input-container {
+        font-family: 'Nunito', 'Trebuchet MS', Arial, sans-serif;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Nunito', 'Trebuchet MS', Arial, sans-serif;
+      }
+
+      body {
+        background-color: #fff0f5;
+      }
+
+      .well {
+        background-color: #fce4ec;
+        border: 1px solid #f48fb1;
+        border-radius: 12px;
+      }
+
+      .btn-primary {
+        background-color: #f48fb1 !important;
+        border-color:     #ec407a !important;
+        color:            #ffffff !important;
+        border-radius:    20px   !important;
+        font-weight:      bold   !important;
+      }
+
+      .btn-primary:hover {
+        background-color: #ec407a !important;
+        border-color:     #e91e8c !important;
+      }
+
+      thead {
+        background-color: #f48fb1;
+        color: white;
+      }
+
+      tbody tr:nth-child(odd)  { background-color: #fff0f5; }
+      tbody tr:nth-child(even) { background-color: #fce4ec; }
+
+      .well p {
+        color: #880e4f;
+      }
+
+      hr {
+        border-color: #f48fb1;
+      }
+
+    "))
+  ),
   
   titlePanel("📬 Postcrossing USPS Stamp Optimizer"),
   p("Find the optimal combination of stamps you own to cover international letter postage."),
@@ -88,7 +176,7 @@ ui <- fluidPage(
                 formatC(get_rate("intl_global_forever"), format = "f", digits = 2), ")")),
               p(em("Ranked by: least overage first, then fewest stamps used")),
               
-              tableOutput("results_table"),
+              withSpinner(tableOutput("results_table"), type = 7, color = "#f48fb1"),
               
               uiOutput("no_results_msg"),
               

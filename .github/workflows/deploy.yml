@@ -18,7 +18,7 @@ jobs:
       - name: Install R packages
         run: |
           Rscript -e 'install.packages(c(
-            "shiny", "dplyr", "tibble", "scales", "rsconnect"
+            "shiny", "dplyr", "tibble", "scales", "rsconnect", "shinycssloaders", "bslib"
           ))'
 
       - name: Deploy to shinyapps.io
