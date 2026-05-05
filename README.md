@@ -10,5 +10,10 @@ you already own to cover current international USPS postage rates.
 - Calculates top 10 optimal combinations for international letter postage
 
 ## Running the App
+Find on shinyapps.io:
+https://kperzel.shinyapps.io/stamp-optimizer/
+
+or
+
 ```r
 shiny::runApp()
