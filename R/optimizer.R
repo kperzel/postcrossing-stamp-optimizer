@@ -40,7 +40,11 @@ find_combinations <- function(owned_stamps,
       # Only keep combinations that meet or exceed the target
       if (total >= target_cents) {
         results[[length(results) + 1]] <- list(
-          stamps     = paste(sort(stamp_names[idx]), collapse = " + "),
+          stamps = paste(
+            sort(paste0(stamp_names[idx], " ($",
+                        formatC(owned_stamps[idx], format = "f", digits = 2), ")")),
+            collapse = " + "
+          ),
           total_cents = total,
           overage    = total - target_cents,
           num_stamps = n
